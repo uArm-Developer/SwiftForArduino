@@ -49,7 +49,6 @@ void uArmController::init()
 
 	if (checkAdcCalibrationFlag())
 	{
-
 		mGetAdcCalibrationFlag = true;
 	}
 	
@@ -248,12 +247,15 @@ void uArmController::attachAllServo()
 {
 	for (int i = SERVO_ROT_NUM; i < SERVO_COUNT; i++)
 	{
-		mServo[i].attach(SERVO_CONTROL_PIN[i]);
+		//mServo[i].attach(SERVO_CONTROL_PIN[i]);
+		attachServo(i);
 	}
 }
 
 void uArmController::attachServo(byte servoNum)
 {
+	float angle = readServoAngle(servoNum);
+	mServo[servoNum].write(angle);
 	mServo[servoNum].attach(SERVO_CONTROL_PIN[servoNum]);
 }
 
@@ -568,7 +570,10 @@ void uArmController::updateAllServoAngle(boolean withOffset)
 	
 	for (unsigned char servoNum = SERVO_ROT_NUM; servoNum < SERVO_COUNT; servoNum++)
 	{
-		mCurAngle[servoNum] = readServoAngle(servoNum, withOffset); 	
+		if (!mServo[servoNum].attached())
+		{
+			mCurAngle[servoNum] = readServoAngle(servoNum, withOffset); 	
+		}
 	}
 	
 }
@@ -953,13 +958,13 @@ double uArmController::analogToAngle(byte servoNum, int inputAnalog)
 	}
 
 
-    	angleValue = (inputAnalog - min) * (angleMax - angleMin) / (max - min) + angleMin ;
+	angleValue = (inputAnalog - min) * (angleMax - angleMin) / (max - min) + angleMin ;
 
 
-	// Serial.print("angleValue=");
-	// Serial.println(angleValue);
+// Serial.print("angleValue=");
+// Serial.println(angleValue);
 
-    	return angleValue;
+	return angleValue;
 
 }
 

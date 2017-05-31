@@ -12,7 +12,9 @@
 #include "uArmComm.h"
 #include "paj7620.h" 
 
+
 GroveColorSensor colorSensor;
+
 
 void GestureReport()
 {
@@ -123,7 +125,7 @@ void GestureReport()
 
 	if (gesture != 255)
 	{
-		msprintf(result, "@%d V%d", GROVE_COLOR_SENSOR, gesture);
+		msprintf(result, "@%d N%d V%d\r\n", REPORT_TYPE_GROVE, GROVE_GESTURE_SERSOR, gesture);
 		reportString(result);
 	}
 
@@ -140,9 +142,13 @@ void GroveColorReport()
 
 	colorSensor.clearInterrupt();
 
-	msprintf(result, "@%d R%d G%d B%d", GROVE_COLOR_SENSOR, red, green, blue);
+	msprintf(result, "@%d N%d R%d G%d B%d\r\n", REPORT_TYPE_GROVE, GROVE_COLOR_SENSOR, red, green, blue);
 	reportString(result);
 }
+
+
+
+
 
 void initGroveModule(GroveType type)
 {
@@ -163,6 +169,8 @@ void initGroveModule(GroveType type)
 
 		break;
 
+
+
 	default:
 		break;
 	}
@@ -170,40 +178,27 @@ void initGroveModule(GroveType type)
 
 void setGroveModuleReportInterval(GroveType type, long interval)
 {
-	switch (type) {
-	case GROVE_COLOR_SENSOR:
-		if (interval <= 0)
-		{
-			// turn off report, remove from list
-			//colorSensor.ledStatus = 0;
-			removeReportService(type);
-		}
-		else
-		{
-			// add to report list
-			//colorSensor.ledStatus = 1;	
-			debugPrint("setGroveModuleReportInterval\n");
-			addReportService(type, interval, GroveColorReport);
-		}
-		break;
 
-	case GROVE_GESTURE_SERSOR:
-		if (interval <= 0)
-		{
-			// turn off report, remove from list
-			//colorSensor.ledStatus = 0;
-			removeReportService(type);
-		}
-		else
-		{
-			// add to report list
-			//colorSensor.ledStatus = 1;	
-			debugPrint("setGroveModuleReportInterval\n");
-			addReportService(type, interval, GestureReport);
-		}		
-		break;
-		
-	default:
-		break;
-	}	
+	if (interval <= 0)
+	{
+		removeReportService(type);		
+	}
+	else
+	{
+
+		switch (type) {
+		case GROVE_COLOR_SENSOR:
+			addReportService(type, interval, GroveColorReport);
+			break;
+
+		case GROVE_GESTURE_SERSOR:
+			addReportService(type, interval, GestureReport);		
+			break;
+
+
+			
+		default:
+			break;
+		}	
+	}
 }

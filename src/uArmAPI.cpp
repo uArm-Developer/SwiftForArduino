@@ -454,13 +454,25 @@ unsigned char setServoAngle(unsigned char servoNumber, double angle, double spee
 		return ERR_ANGLE_OUT_OF_RANGE;
 	}
 
-	if (speed == 0)
+	if (speed < 0)
 	{
+		return OUT_OF_RANGE_NO_SOLUTION;
+	}
+	else if (speed == 0)
+	{
+		controller.setServoSpeed(255);
 		controller.writeServoAngle(servoNumber, angle);
+	}
+	else if (speed < 100)
+	{
+		unsigned char dutyCycle = map(speed, 0, 99, 0,  255);   
+		
+		controller.setServoSpeed(dutyCycle);	
+		controller.writeServoAngle(servoNumber, angle);	
 	}
 	else
 	{
-		
+		controller.setServoSpeed(255);
 		result = _moveToAngle(servoNumber, angle, speed);
 
 		if(result != OUT_OF_RANGE_NO_SOLUTION)

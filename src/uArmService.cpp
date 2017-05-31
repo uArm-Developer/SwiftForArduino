@@ -82,6 +82,7 @@ void menuButtonLongPressed()
 		service.handleButtonEvent(BUTTON_MENU, EVENT_LONG_PRESS);
 	}
 }
+
 void playButtonClicked()
 {
 	if (service.buttonServiceDisable())
@@ -260,7 +261,7 @@ void uArmService::handleButtonEvent(BUTTON_ID button, unsigned char event)
 				break;
 
 			case LEARNING_MODE:
-				if (buttonState.isPressed())
+				if (!buttonState.isPressed())
 				{
 					if (getPumpStatus())
 					{
@@ -346,6 +347,7 @@ void uArmService::recorderTick()
 			ledAllOff();
 			#endif
 			controller.attachAllServo();
+		
 
 		}
 		break;
@@ -532,6 +534,7 @@ void uArmService::btDetect()
 		
 		digitalWrite(BT_DETECT_PIN, HIGH);
 
+		/*
 		if (digitalRead(BT_DETECT_PIN) == HIGH && !mBTDisable)
 		{
 			ledBlue.on();
@@ -547,6 +550,30 @@ void uArmService::btDetect()
 			setSerialPort(&Serial);
 			//#endif
 			mSysStatus = NORMAL_MODE;
+		}
+		*/
+
+		if (mSysStatus == NORMAL_MODE)
+		{
+			if (digitalRead(BT_DETECT_PIN) == HIGH && !mBTDisable)
+			{
+				ledBlue.on();
+				
+				setSerialPort(&Serial2);
+				
+				mSysStatus = NORMAL_BT_CONNECTED_MODE;
+			}		
+		}
+		else if (mSysStatus == NORMAL_BT_CONNECTED_MODE)
+		{
+			if (digitalRead(BT_DETECT_PIN) != HIGH || mBTDisable)
+			{
+				ledBlue.off();
+				
+				setSerialPort(&Serial);
+				
+				mSysStatus = NORMAL_MODE;
+			}		
 		}
 
 		//pinMode(BT_DETECT_PIN, OUTPUT);
@@ -566,6 +593,25 @@ void uArmService::run()
 		mTickRecorderTime= millis();
 		recorderTick();
 	}
+
+	
+	static uint8_t last_switch_state = 0;
+
+	uint8_t switch_state = buttonState.isPressed();
+
+	if (switch_state != last_switch_state)
+	{
+		if (switch_state)
+		{
+			mBTDisable = false;
+		}
+		else
+		{
+			mBTDisable = true;
+		}
+
+		last_switch_state = switch_state;
+	}	
 }
 
 
@@ -578,7 +624,7 @@ bool uArmService::play()
 
 
 	recorder.read(mRecordAddr, data, 5);
-	debugPrint("mRecordAddr = %d, data=%d, %d, %d", mRecordAddr, data[0], data[1], data[2]);
+	debugPrint("mRecordAddr = %d, data=%d, %d, %d\r\n", mRecordAddr, data[0], data[1], data[2]);
 
 	if(data[0] != 255)
 	{
@@ -587,6 +633,8 @@ bool uArmService::play()
 		//moveToAngle((double)data[2], (double)data[0], (double)data[1]);
 		controller.writeServoAngle((double)data[2], (double)data[0], (double)data[1]);
 		controller.writeServoAngle(SERVO_HAND_ROT_NUM, (double)data[3]);
+
+		/*
 		unsigned char pumpStatus = getPumpStatus() > 0 ? 1 : 0;
 		if (pumpStatus != data[4])
 		{
@@ -599,6 +647,21 @@ bool uArmService::play()
 				pumpOff();
 			}   
 		}
+		*/
+
+		if (data[4] >= 0x10)
+		{
+			gripperCatch();
+		}
+		else if (data[4] >= 0x01)
+		{
+			pumpOn();
+		}
+		else
+		{
+			pumpOff();
+			gripperRelease();
+		}		
 	}
 	else
 	{
@@ -629,7 +692,14 @@ bool uArmService::record()
 			data[1] = (unsigned char)right;
 			data[2] = (unsigned char)rot;
 			data[3] = (unsigned char)controller.readServoAngle(SERVO_HAND_ROT_NUM);
-			data[4] = getPumpStatus() > 0 ? 1 : 0;
+			if (!buttonState.isPressed())
+			{
+				data[4] = getPumpStatus() > 0 ? 1 : 0;
+			}
+			else
+			{
+				data[4] = getGripperStatus() > 0 ? 0x10 : 0;
+			}
 
 			debugPrint("l=%d, r=%d, r= %d", data[0], data[1], data[2]);
 		}

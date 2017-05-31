@@ -968,6 +968,25 @@ static unsigned char cmdRelativeMovePol(int serialNum, int parameterCount, doubl
 }
 
 
+static unsigned char cmdDetachAllServo(int serialNum, int parameterCount, double value[4])
+{
+	controller.detachAllServo();
+
+	replyOK(serialNum);
+
+	return 0;
+}
+
+
+static unsigned char cmdAttachAllServo(int serialNum, int parameterCount, double value[4])
+{
+	controller.attachAllServo();
+
+	replyOK(serialNum);
+
+	return 0;
+}
+
 static unsigned char cmdSetReportInterval(int serialNum, int parameterCount, double value[4])
 {
 	if (parameterCount != 1)
@@ -1167,6 +1186,14 @@ static void HandleSettingCmd(int cmdCode, int serialNum, int parameterCount, dou
 
 	switch (cmdCode)
 	{
+	case 17:
+		result = cmdAttachAllServo(serialNum, parameterCount, value);
+		break;
+
+	case 2019:
+		result = cmdDetachAllServo(serialNum, parameterCount, value);
+		break;
+
 	case 120:
 	case 2120:
 		result = cmdSetReportInterval(serialNum, parameterCount, value);

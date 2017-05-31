@@ -15,22 +15,18 @@
 #include <Arduino.h>
 
 
-//#define MKII
-#define SWIFT
-//#define METAL
 
-//#define CALIBRATION
+#define SWIFT
+
 //#define DEBUG                 // uncomment if you want to print debug info
 
 
-#ifdef MKII
-	#define METAL_MOTOR           // use servos made of metal
-#endif
+
 
 
 #ifdef SWIFT
 	#define HW_VER  "3.2"
-	#define SW_VER  "2.3.5"
+	#define SW_VER  "2.3.6"
 #elif defined(MKII)
 	#define HW_VER  "3.1"
 	#define SW_VER  "2.2.4"
@@ -38,7 +34,7 @@
 	#define HW_VER  "2.1"
 	#define SW_VER  "2.2.4"
 #else
-	#error "NO machine model defined(METAL, MKII)"
+	#error "NO machine model defined(SWIFT, METAL, MKII)"
 #endif
 
 #ifdef SWIFT
