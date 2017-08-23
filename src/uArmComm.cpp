@@ -163,7 +163,7 @@ static void replyOK(int serialNum)
 		CommSerial->print(serialNum);
 		CommSerial->print(" ");
 	}
-	CommSerial->println("OK");   
+	CommSerial->println("ok");
 }
 
 static void replyResult(int serialNum, String result)
@@ -174,7 +174,7 @@ static void replyResult(int serialNum, String result)
 		CommSerial->print(serialNum);
 		CommSerial->print(" ");
 	}
-	CommSerial->print("OK ");
+	CommSerial->print("ok ");
 	CommSerial->println(result);   
 }
 
