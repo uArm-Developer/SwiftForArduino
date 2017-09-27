@@ -10,7 +10,10 @@
 #include "uArmIIC.h" 
 void delay_us()
 {
-
+	for (int i = 0; i < 2; i++)
+	{
+		asm volatile ("nop\n\t");
+	}
 
 }
 

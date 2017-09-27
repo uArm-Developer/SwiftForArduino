@@ -26,7 +26,7 @@
 
 #ifdef SWIFT
 	#define HW_VER  "3.2"
-	#define SW_VER  "2.3.6"
+	#define SW_VER  "2.3.7"
 #elif defined(MKII)
 	#define HW_VER  "3.1"
 	#define SW_VER  "2.2.4"
